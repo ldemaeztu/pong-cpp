@@ -1,4 +1,4 @@
-#include "engine.h"
+#include "engine.hpp"
 
 #include <GL/glut.h>
 #include <GL/freeglut.h>
@@ -10,10 +10,10 @@ Engine engine;
 void keySpecialFunc(int key, int x, int y) {
 	switch(key){
 		case GLUT_KEY_UP:
-            engine.setPaddleLSpeed(1.0f);
+            engine.setObjectSpeed(ObjectType::PaddleLeft, Speed(0.0f, 3.0f * SPEED_UNIT));
 			break;
 		case GLUT_KEY_DOWN:
-			engine.setPaddleLSpeed(-1.0f);
+			engine.setObjectSpeed(ObjectType::PaddleLeft, Speed(0.0f, -3.0f * SPEED_UNIT));
 			break;
 	}    
 }
@@ -57,8 +57,9 @@ void drawPaddle(Position pos, Dimensions dims) {
 void renderScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     drawScore();
-    drawPaddle(engine.getPaddleLPosition(), engine.getPaddleLDimensions());
-    drawPaddle(engine.getPaddleRPosition(), engine.getPaddleRDimensions());
+    drawPaddle(engine.getObjectPosition(ObjectType::PaddleLeft), engine.getObjectDimensions(ObjectType::PaddleLeft));
+    drawPaddle(engine.getObjectPosition(ObjectType::PaddleRight), engine.getObjectDimensions(ObjectType::PaddleRight));
+    drawPaddle(engine.getObjectPosition(ObjectType::Ball), engine.getObjectDimensions(ObjectType::Ball));
     glutSwapBuffers();
     }
 

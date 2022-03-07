@@ -13,10 +13,16 @@ struct Dimensions
     float h;
 };
 
+struct Speed
+{
+    Speed(float vx, float vy) : x(vx), y(vy) {};
+    float x;
+    float y;
+};
 
 class Object {
 public:
-    Object();
+    Object(bool continuousSpeed);
     ~Object();
 
     void setPosition(float x, float y);
@@ -25,15 +31,17 @@ public:
     Position getPosition();
     Dimensions getDimensions();
 
-    void setSpeed(float speed);
+    void setSpeed(Speed speed);
 
     void updatePosition();
+    void forceYPosition(float y);
 
 private:
     Position m_position;
     Dimensions m_dimensions;
 
-    float m_speed;
+    Speed m_speed;
+    bool m_continuousMovement;
 };
 
 #endif

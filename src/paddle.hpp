@@ -1,11 +1,11 @@
 #ifndef PADDLE_H
 #define PADDLE_H    
 
-#include "object.h"
+#include "object.hpp"
 
 class Paddle : public Object {
 public:
-    Paddle(){};
+    Paddle() : Object(false) {};
     ~Paddle(){};
 
 private:
