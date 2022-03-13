@@ -22,11 +22,14 @@ public:
 
     Object& getObject(ObjectType objectType);
 
-    Position getObjectPosition(ObjectType objectType);
+    Vector2D getObjectPosition(ObjectType objectType);
     Dimensions getObjectDimensions(ObjectType objectType);
+    Boundaries getObjectBoundaries(ObjectType objectType);
 
-    void setObjectSpeed(ObjectType objectType, Speed speed);
+    void setObjectSpeed(ObjectType objectType, Vector2D speed);
 
+    void followBall();
+    void checkCollisions();
     void updatePositions();
 
 private:

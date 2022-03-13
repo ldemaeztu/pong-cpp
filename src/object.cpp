@@ -3,7 +3,7 @@
 #include <iostream>
     
     
-Object::Object(bool continuousMovement) : m_speed(0.0, 0.0f), m_continuousMovement(continuousMovement) {
+Object::Object() : m_speed(0.0f, 0.0f), m_position(0.0f, 0.0f) {
 
 };
 
@@ -21,7 +21,7 @@ void Object::setDimensions(float w, float h) {
     m_dimensions.h = h;
 }
 
-Position Object::getPosition() {
+Vector2D Object::getPosition() {
     return m_position;
 }
 
@@ -29,19 +29,22 @@ Dimensions Object::getDimensions() {
     return m_dimensions;
 }
 
-void Object::setSpeed(Speed speed) {
+void Object::setSpeed(Vector2D speed) {
     m_speed = speed;
 }
 
-void Object::updatePosition() {
-    m_position.x += m_speed.x;
-    m_position.y += m_speed.y;
-    if (!m_continuousMovement) {
-        m_speed.x = 0.0f;
-        m_speed.y = 0.0f;
-    }
+float Object::getLeftBoundary() {
+    return m_position.x - m_dimensions.w/2.0f;
 }
 
-void Object::forceYPosition(float y) {
-    m_position.y = y;
+float Object::getRightBoundary() {
+    return m_position.x + m_dimensions.w/2.0f;
+}
+
+float Object::getTopBoundary() {
+    return m_position.y - m_dimensions.h/2.0f;
+}
+
+float Object::getBottomBoundary() {
+    return m_position.y + m_dimensions.h/2.0f;
 }

@@ -10,10 +10,10 @@ Engine engine;
 void keySpecialFunc(int key, int x, int y) {
 	switch(key){
 		case GLUT_KEY_UP:
-            engine.setObjectSpeed(ObjectType::PaddleLeft, Speed(0.0f, 3.0f * SPEED_UNIT));
+            engine.setObjectSpeed(ObjectType::PaddleLeft, Vector2D(0.0f, 3.0f * SPEED_UNIT));
 			break;
 		case GLUT_KEY_DOWN:
-			engine.setObjectSpeed(ObjectType::PaddleLeft, Speed(0.0f, -3.0f * SPEED_UNIT));
+			engine.setObjectSpeed(ObjectType::PaddleLeft, Vector2D(0.0f, -3.0f * SPEED_UNIT));
 			break;
 	}    
 }
@@ -37,17 +37,17 @@ void drawScore() {
     glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)text2.c_str());
 }
 
-void drawPaddle(Position pos, Dimensions dims) {
+void drawRectangle(Boundaries boundaries) {
     glColor3f(1.0f, 1.0f, 1.0f);
     glLineWidth(30);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     glBegin(GL_POLYGON);
-        glVertex2f(pos.x - dims.w/2.0f, pos.y - dims.h/2.0f);
-        glVertex2f(pos.x + dims.w/2.0f, pos.y - dims.h/2.0f);
-        glVertex2f(pos.x + dims.w/2.0f, pos.y + dims.h/2.0f);
-        glVertex2f(pos.x - dims.w/2.0f, pos.y + dims.h/2.0f);
+        glVertex2f(boundaries.l, boundaries.t);
+        glVertex2f(boundaries.r, boundaries.t);
+        glVertex2f(boundaries.r, boundaries.b);
+        glVertex2f(boundaries.l, boundaries.b);
     glEnd();
 
     glFlush();       
@@ -57,9 +57,9 @@ void drawPaddle(Position pos, Dimensions dims) {
 void renderScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     drawScore();
-    drawPaddle(engine.getObjectPosition(ObjectType::PaddleLeft), engine.getObjectDimensions(ObjectType::PaddleLeft));
-    drawPaddle(engine.getObjectPosition(ObjectType::PaddleRight), engine.getObjectDimensions(ObjectType::PaddleRight));
-    drawPaddle(engine.getObjectPosition(ObjectType::Ball), engine.getObjectDimensions(ObjectType::Ball));
+    drawRectangle(engine.getObjectBoundaries(ObjectType::PaddleLeft));
+    drawRectangle(engine.getObjectBoundaries(ObjectType::PaddleRight));
+    drawRectangle(engine.getObjectBoundaries(ObjectType::Ball));
     glutSwapBuffers();
     }
 
@@ -73,6 +73,8 @@ void renderTitle(int value) {
 }
 
 void update(int value) {
+    engine.followBall();
+    engine.checkCollisions();
     engine.updatePositions();
 
     glutTimerFunc(20, update, value);

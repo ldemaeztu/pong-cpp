@@ -5,8 +5,11 @@
 
 class Ball : public Object {
 public:
-    Ball() : Object(true) {};
+    Ball() : Object() {};
     ~Ball(){};
+
+    void checkBoundaries();
+    void updatePosition();
 
 private:
 

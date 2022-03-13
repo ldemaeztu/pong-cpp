@@ -5,8 +5,12 @@
 
 class Paddle : public Object {
 public:
-    Paddle() : Object(false) {};
+    Paddle() : Object() {};
     ~Paddle(){};
+
+    void checkBoundaries();
+    void updatePosition();
+
 
 private:
 
