@@ -11,12 +11,12 @@ Object::~Object() {
 
 };
 
-void Object::setPosition(float x, float y) {
+void Object::setPosition(const float x, const float y) {
     m_position.x = x;
     m_position.y = y;
 }
 
-void Object::setDimensions(float w, float h) {
+void Object::setDimensions(const float w, const float h) {
     m_dimensions.w = w;
     m_dimensions.h = h;
 }
@@ -29,7 +29,7 @@ Dimensions Object::getDimensions() {
     return m_dimensions;
 }
 
-void Object::setSpeed(Vector2D speed) {
+void Object::setSpeed(const Vector2D speed) {
     m_speed = speed;
 }
 
@@ -47,4 +47,14 @@ float Object::getTopBoundary() {
 
 float Object::getBottomBoundary() {
     return m_position.y + m_dimensions.h/2.0f;
+}
+
+Boundaries Object::getBoundaries() {
+    Boundaries b(getLeftBoundary(), getRightBoundary(), getTopBoundary(), getBottomBoundary());
+    return b;
+}
+
+Boundaries Object::getFutureBoundaries() {
+    Boundaries b(getLeftBoundary() + m_speed.x, getRightBoundary() + m_speed.x, getTopBoundary() + m_speed.y, getBottomBoundary() + m_speed.y);
+    return b;
 }

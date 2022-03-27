@@ -9,7 +9,9 @@ public:
     ~Ball(){};
 
     void checkBoundaries();
-    void updatePosition();
+    void checkCollision(Boundaries paddleBound);
+    Boundaries computeOverlap(Boundaries paddleBound, Boundaries ballBound);
+    void updatePosition();    
 
 private:
 

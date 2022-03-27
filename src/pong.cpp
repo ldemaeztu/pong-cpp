@@ -7,7 +7,7 @@
 
 Engine engine;
 
-void keySpecialFunc(int key, int x, int y) {
+void keySpecialFunc(const int key, const int x, const int y) {
 	switch(key){
 		case GLUT_KEY_UP:
             engine.setObjectSpeed(ObjectType::PaddleLeft, Vector2D(0.0f, 3.0f * SPEED_UNIT));
@@ -18,7 +18,7 @@ void keySpecialFunc(int key, int x, int y) {
 	}    
 }
 
-void keyKeyboardFunc(unsigned char key, int x, int y) {
+void keyKeyboardFunc(const unsigned char key, const int x, const int y) {
 	switch(key){
         case 'q':
             exit(0);
@@ -37,7 +37,7 @@ void drawScore() {
     glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)text2.c_str());
 }
 
-void drawRectangle(Boundaries boundaries) {
+void drawRectangle(const Boundaries boundaries) {
     glColor3f(1.0f, 1.0f, 1.0f);
     glLineWidth(30);
 
@@ -63,7 +63,7 @@ void renderScene() {
     glutSwapBuffers();
     }
 
-void renderTitle(int value) {
+void renderTitle(const int value) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(1.0f, 1.0f, 1.0f); 
     glRasterPos2f(-0.15f, 0.0f);
@@ -72,7 +72,7 @@ void renderTitle(int value) {
     glutSwapBuffers();
 }
 
-void update(int value) {
+void update(const int value) {
     engine.followBall();
     engine.checkCollisions();
     engine.updatePositions();

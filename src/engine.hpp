@@ -20,13 +20,14 @@ public:
     // Inits objects
     void initObjects();
 
-    Object& getObject(ObjectType objectType);
+    Object& getObject(const ObjectType objectType);
 
-    Vector2D getObjectPosition(ObjectType objectType);
-    Dimensions getObjectDimensions(ObjectType objectType);
-    Boundaries getObjectBoundaries(ObjectType objectType);
+    Vector2D getObjectPosition(const ObjectType objectType);
+    Dimensions getObjectDimensions(const ObjectType objectType);
+    Boundaries getObjectBoundaries(const ObjectType objectType);
+    Boundaries getFutureObjectBoundaries(const ObjectType objectType);
 
-    void setObjectSpeed(ObjectType objectType, Vector2D speed);
+    void setObjectSpeed(const ObjectType objectType, const Vector2D speed);
 
     void followBall();
     void checkCollisions();

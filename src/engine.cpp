@@ -45,9 +45,12 @@ Dimensions Engine::getObjectDimensions(ObjectType objectType) {
 
 Boundaries Engine::getObjectBoundaries(ObjectType objectType) {
     Object &obj = getObject(objectType);
-    Boundaries boundaries(obj.getLeftBoundary(), obj.getRightBoundary(), 
-        obj.getTopBoundary(), obj.getBottomBoundary());
-    return boundaries;
+    return obj.getBoundaries();
+}
+
+Boundaries Engine::getFutureObjectBoundaries(ObjectType objectType) {
+    Object &obj = getObject(objectType);
+    return obj.getBoundaries();
 }
 
 void Engine::setObjectSpeed(ObjectType objectType, Vector2D speed) {
@@ -64,13 +67,21 @@ void Engine::followBall() {
         m_paddleR.setSpeed(Vector2D(0.0f, -3.0f * SPEED_UNIT));
 }
 
-/** Comprueba si hay colisiones entre objetos y cambia su movimiento */
+/** Checks if there are collisions and modifies movement accordingly */
 void Engine::checkCollisions() {
+    // Check that the objects don't move out of the screen
     m_paddleL.checkBoundaries();
     m_paddleR.checkBoundaries();
+    m_ball.checkBoundaries();
+
+    // Check collision between ball and paddle
+    Boundaries bFutL = getFutureObjectBoundaries(ObjectType::PaddleLeft);
+    m_ball.checkCollision(bFutL);
+    Boundaries bFutR = getFutureObjectBoundaries(ObjectType::PaddleRight);
+    m_ball.checkCollision(bFutR);
 }
 
-/** Actualiza posición de todos los elementos móviles */
+/** Updates moving objects position */
 void Engine::updatePositions() {
     m_ball.updatePosition();
     m_paddleL.updatePosition();
