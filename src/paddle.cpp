@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-/** Anula la velocidad de todo objeto que se vaya a salir de la pantalla */
+/** Avoids that the paddles leave the screen */
 void Paddle::checkBoundaries() {
     if (getTopBoundary() <= -0.99f) {
         m_speed.y = std::max(0.0f, m_speed.y);
@@ -12,6 +12,7 @@ void Paddle::checkBoundaries() {
     }    
 }
 
+/** Updates position according to previous position and speed */
 void Paddle::updatePosition() {
     m_position.x += m_speed.x;
     m_position.y += m_speed.y;
