@@ -2,17 +2,13 @@
 
 #include <algorithm>
 
-/** Makes ball rebound on screen boundaries */
-void Ball::checkBoundaries() {
-    if (getTopBoundary() <= -0.99f)
-        m_speed.y = -1.0f * m_speed.y;
-    if (getBottomBoundary() >= 0.99f)
-        m_speed.y = -1.0f * m_speed.y;
-    if (getLeftBoundary() <= -0.99f)
-        m_speed.x = -1.0f * m_speed.x;
-    if (getRightBoundary() >= 0.99f)
-        m_speed.x = -1.0f * m_speed.x;
+Ball::Ball() {
+
 }
+
+Ball::~Ball() {
+    
+};
 
 /** 
  * Checks if there is a collision between the ball and a paddle.
@@ -49,8 +45,22 @@ Boundaries Ball::computeOverlap(Boundaries paddleBound, Boundaries ballBound) {
     return overlap;
 }
 
+/** Modify movement of the ball according to possible collisions */
+void Ball::modifyMovement() {
+    if (m_isOnTopBound || m_isOnBottomBound)
+        m_speed.y = -1.0f * m_speed.y;
+    if (m_isOnLeftBound || m_isOnRightBound)
+        m_speed.x = -1.0f * m_speed.x;
+}
+
 /** Updates position according to previous position and speed */
 void Ball::updatePosition() {
     m_position.x += m_speed.x;
     m_position.y += m_speed.y;
+}
+
+/** Returns if a goal has been scored given the current position of the ball */
+void Ball::checkGoal(bool& goalLeftPlayer, bool& goalRightPlayer) {
+    goalLeftPlayer = m_isOnLeftBound;
+    goalRightPlayer = m_isOnRightBound;
 }

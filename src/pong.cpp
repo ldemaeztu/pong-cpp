@@ -28,12 +28,12 @@ void keyKeyboardFunc(const unsigned char key, const int x, const int y) {
 void drawScore() {
     glColor3f(1.0f, 0.0f, 0.0f); 
     glRasterPos2f(-0.5f, 0.9f);
-    std::string text1 = std::to_string(0);
+    std::string text1 = std::to_string(engine.getLeftScore());
     glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)text1.c_str());
 
     glColor3f(0.0f, 1.0f, 0.0f); 
     glRasterPos2f(0.5f, 0.9f);
-    std::string text2 = std::to_string(0);
+    std::string text2 = std::to_string(engine.getRightScore());
     glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)text2.c_str());
 }
 
@@ -72,10 +72,9 @@ void renderTitle(const int value) {
     glutSwapBuffers();
 }
 
+/** Called one time per frame */
 void update(const int value) {
-    engine.followBall();
-    engine.checkCollisions();
-    engine.updatePositions();
+    engine.refreshNextFrame();
 
     glutTimerFunc(20, update, value);
     glutPostRedisplay();

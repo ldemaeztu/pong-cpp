@@ -3,7 +3,9 @@
 #include <iostream>
     
     
-Object::Object() : m_speed(0.0f, 0.0f), m_position(0.0f, 0.0f) {
+Object::Object() : m_speed(0.0f, 0.0f), m_position(0.0f, 0.0f), 
+    m_isOnTopBound(false), m_isOnBottomBound(false), 
+    m_isOnLeftBound(false), m_isOnRightBound(false) {
 
 };
 
@@ -57,4 +59,28 @@ Boundaries Object::getBoundaries() {
 Boundaries Object::getFutureBoundaries() {
     Boundaries b(getLeftBoundary() + m_speed.x, getRightBoundary() + m_speed.x, getTopBoundary() + m_speed.y, getBottomBoundary() + m_speed.y);
     return b;
+}
+
+/** Makes ball rebound on screen boundaries */
+void Object::checkIsOnBoundaries() {
+    m_isOnTopBound = isOnTopBoundary();
+    m_isOnBottomBound = isOnBottomBoundary();
+    m_isOnLeftBound = isOnLeftBoundary();
+    m_isOnRightBound = isOnRightBoundary();
+}
+
+bool Object::isOnTopBoundary() {
+    return getTopBoundary() <= -SCREEN_LIMIT;
+}
+
+bool Object::isOnBottomBoundary() {
+    return getBottomBoundary() >= SCREEN_LIMIT;
+}
+
+bool Object::isOnLeftBoundary() {
+    return getLeftBoundary() <= -SCREEN_LIMIT;
+}
+
+bool Object::isOnRightBoundary() {
+    return getRightBoundary() >= SCREEN_LIMIT;
 }

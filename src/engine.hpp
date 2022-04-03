@@ -20,17 +20,26 @@ public:
     // Inits objects
     void initObjects();
 
+    // Get object properties
     Object& getObject(const ObjectType objectType);
-
     Vector2D getObjectPosition(const ObjectType objectType);
     Dimensions getObjectDimensions(const ObjectType objectType);
     Boundaries getObjectBoundaries(const ObjectType objectType);
     Boundaries getFutureObjectBoundaries(const ObjectType objectType);
 
+    // Set object properties
     void setObjectSpeed(const ObjectType objectType, const Vector2D speed);
 
+    // Get game score
+    int getLeftScore();
+    int getRightScore();
+
+    // Game mechanics 
+    void refreshNextFrame();
     void followBall();
     void checkCollisions();
+    void checkGoal();
+    void modifyMovement();
     void updatePositions();
 
 private:
@@ -39,6 +48,8 @@ private:
 
     Ball m_ball;
 
+    bool m_goalLeftPlayer;
+    bool m_goalRightPlayer;
 };
 
 #endif

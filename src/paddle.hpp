@@ -5,15 +5,17 @@
 
 class Paddle : public Object {
 public:
-    Paddle() : Object() {};
-    ~Paddle(){};
+    Paddle();
+    ~Paddle();
 
-    void checkBoundaries();
+    void modifyMovement();
     void updatePosition();
 
+    int getScore();
+    void addOnePoint();
 
 private:
-
+    int m_score;
 
 };
 

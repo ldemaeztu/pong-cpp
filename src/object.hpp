@@ -3,6 +3,8 @@
 
 #include <algorithm>
 
+#define SCREEN_LIMIT 0.99f
+
 struct Dimensions
 {
     float w;
@@ -41,10 +43,14 @@ public:
 
     void setSpeed(const Vector2D speed);
 
+    virtual void modifyMovement() = 0;
     virtual void updatePosition() = 0;
 
-    // Los distintos tipos de objetos implementan el chequeo de bordes de manera diferente
-    virtual void checkBoundaries() = 0;
+    void checkIsOnBoundaries();
+    bool isOnTopBoundary();
+    bool isOnBottomBoundary();
+    bool isOnLeftBoundary();
+    bool isOnRightBoundary();
 
     float getLeftBoundary();
     float getRightBoundary();
@@ -59,6 +65,12 @@ protected:
     Dimensions m_dimensions;
 
     Vector2D m_speed;
+
+    bool m_isOnTopBound;
+    bool m_isOnBottomBound;
+    bool m_isOnLeftBound;
+    bool m_isOnRightBound;
+
 };
 
 #endif

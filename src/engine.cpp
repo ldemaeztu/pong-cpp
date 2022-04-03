@@ -58,6 +58,24 @@ void Engine::setObjectSpeed(ObjectType objectType, Vector2D speed) {
     obj.setSpeed(speed);
 }
 
+int Engine::getLeftScore() {
+    return m_paddleL.getScore();
+}
+
+int Engine::getRightScore() {
+    return m_paddleR.getScore();
+}
+
+/** Does all game mechanics computations to update for next frame */
+void Engine::refreshNextFrame() {
+    followBall();
+    checkCollisions();
+    checkGoal();
+    modifyMovement();
+    updatePositions();
+}
+
+/** Makes necessary movements so that right paddle follows the ball vertically */
 void Engine::followBall() {
     Vector2D ballPosition = m_ball.getPosition();
     Vector2D paddlePosition = m_paddleR.getPosition();
@@ -70,15 +88,33 @@ void Engine::followBall() {
 /** Checks if there are collisions and modifies movement accordingly */
 void Engine::checkCollisions() {
     // Check that the objects don't move out of the screen
-    m_paddleL.checkBoundaries();
-    m_paddleR.checkBoundaries();
-    m_ball.checkBoundaries();
+    m_paddleL.checkIsOnBoundaries();
+    m_paddleR.checkIsOnBoundaries();
+    m_ball.checkIsOnBoundaries();
 
     // Check collision between ball and paddle
     Boundaries bFutL = getFutureObjectBoundaries(ObjectType::PaddleLeft);
     m_ball.checkCollision(bFutL);
     Boundaries bFutR = getFutureObjectBoundaries(ObjectType::PaddleRight);
     m_ball.checkCollision(bFutR);
+}
+
+/** Check if a goal is scored, in this case add point and reset object positions */
+void Engine::checkGoal() {
+    m_ball.checkGoal(m_goalLeftPlayer, m_goalRightPlayer);
+    if (m_goalLeftPlayer)
+        m_paddleR.addOnePoint();
+    if (m_goalRightPlayer)
+        m_paddleL.addOnePoint();    
+    if (m_goalLeftPlayer || m_goalRightPlayer)
+        initObjects();
+}
+
+/** Modify movement of the objects according to the computed collisions */
+void Engine::modifyMovement() {
+    m_paddleL.modifyMovement();
+    m_paddleR.modifyMovement();
+    m_ball.modifyMovement();
 }
 
 /** Updates moving objects position */
