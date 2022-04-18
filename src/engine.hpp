@@ -17,39 +17,37 @@ public:
     Engine();
     ~Engine();
 
-    // Inits objects
+    // Inits all objects in the screen
     void initObjects();
 
-    // Get object properties
+    // Get one of the game objects
     Object& getObject(const ObjectType objectType);
-    Vector2D getObjectPosition(const ObjectType objectType);
-    Dimensions getObjectDimensions(const ObjectType objectType);
+
+    // Get object properties
     Boundaries getObjectBoundaries(const ObjectType objectType);
     Boundaries getFutureObjectBoundaries(const ObjectType objectType);
-
-    // Set object properties
-    void setObjectSpeed(const ObjectType objectType, const Vector2D speed);
 
     // Get game score
     int getLeftScore();
     int getRightScore();
 
+    // Set object properties
+    void setObjectSpeed(const ObjectType objectType, const Vec2D speed);
+
     // Game mechanics 
     void refreshNextFrame();
-    void followBall();
+    void followBallPaddleR();
     void checkCollisions();
-    void checkGoal();
-    void modifyMovement();
+    bool checkGoalAddScore();
+    void modifySpeed();
     void updatePositions();
+    void resetPaddlesSpeed();
 
 private:
+    // Game objects
     Paddle m_paddleL;
     Paddle m_paddleR;
-
     Ball m_ball;
-
-    bool m_goalLeftPlayer;
-    bool m_goalRightPlayer;
 };
 
 #endif

@@ -5,38 +5,42 @@
 
 #include <iostream>
 
-Engine engine;
+Engine engine; // Engine that control the game dynamics
 
+/** Updates the speed of the player's paddle if a key is pressed */
 void keySpecialFunc(const int key, const int x, const int y) {
 	switch(key){
 		case GLUT_KEY_UP:
-            engine.setObjectSpeed(ObjectType::PaddleLeft, Vector2D(0.0f, 3.0f * SPEED_UNIT));
+            engine.setObjectSpeed(ObjectType::PaddleLeft, Vec2D(0.0f, 3.0f * SPEED_UNIT));
 			break;
 		case GLUT_KEY_DOWN:
-			engine.setObjectSpeed(ObjectType::PaddleLeft, Vector2D(0.0f, -3.0f * SPEED_UNIT));
+			engine.setObjectSpeed(ObjectType::PaddleLeft, Vec2D(0.0f, -3.0f * SPEED_UNIT));
 			break;
 	}    
 }
 
+/** Quits if 'q' key is pressed */
 void keyKeyboardFunc(const unsigned char key, const int x, const int y) {
 	switch(key){
         case 'q':
             exit(0);
 	}    
 }
-
-void drawScore() {
+/** Draws game scores */
+void drawScores() {
+    // Draws score left player
     glColor3f(1.0f, 0.0f, 0.0f); 
     glRasterPos2f(-0.5f, 0.9f);
     std::string text1 = std::to_string(engine.getLeftScore());
     glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)text1.c_str());
-
+    // Draws score right player
     glColor3f(0.0f, 1.0f, 0.0f); 
     glRasterPos2f(0.5f, 0.9f);
     std::string text2 = std::to_string(engine.getRightScore());
     glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)text2.c_str());
 }
 
+/** Draws rectangle given boundaries */
 void drawRectangle(const Boundaries boundaries) {
     glColor3f(1.0f, 1.0f, 1.0f);
     glLineWidth(30);
@@ -53,16 +57,17 @@ void drawRectangle(const Boundaries boundaries) {
     glFlush();       
 }
 
-
+/** Renders a frame */
 void renderScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    drawScore();
+    drawScores();
     drawRectangle(engine.getObjectBoundaries(ObjectType::PaddleLeft));
     drawRectangle(engine.getObjectBoundaries(ObjectType::PaddleRight));
     drawRectangle(engine.getObjectBoundaries(ObjectType::Ball));
     glutSwapBuffers();
-    }
+}
 
+/** Renders game title */
 void renderTitle(const int value) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(1.0f, 1.0f, 1.0f); 
@@ -80,6 +85,7 @@ void update(const int value) {
     glutPostRedisplay();
 }
 
+/** Inits graphics and configures periodic refreshing */
 void initGraphics(int argc, char* argv[]){
     glutInit(&argc, argv);
 
@@ -103,6 +109,5 @@ void initGraphics(int argc, char* argv[]){
 
 int main(int argc, char* argv[]) {
     engine.initObjects();
-
     initGraphics(argc, argv);
 }

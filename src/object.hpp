@@ -5,13 +5,6 @@
 
 #define SCREEN_LIMIT 0.99f
 
-struct Dimensions
-{
-    float w;
-    float h;
-};
-
-
 struct Boundaries
 {
     Boundaries(const float l_, const float r_, const float t_, const float b_) : l(l_), r(r_), t(t_), b(b_) {};
@@ -23,54 +16,53 @@ struct Boundaries
 };
 
 
-struct Vector2D
+struct Vec2D
 {
-    Vector2D(const float x_, const float y_) : x(x_), y(y_) {};
+    Vec2D(const float x_, const float y_) : x(x_), y(y_) {};
     float x;
     float y;
 };
 
 class Object {
 public:
-    Object();
+    Object(Vec2D dim);
     ~Object();
 
+    // Get object properties
+    Vec2D getPosition();
+    Boundaries getBoundaries();
+    Boundaries getFutureBoundaries();
+    float getLeftBoundary();
+    float getRightBoundary();
+    float getTopBoundary();
+    float getBottomBoundary();
+
+    // Set object properties
     void setPosition(const float x, const float y);
-    void setDimensions(const float w, const float h);
+    void setSpeed(const Vec2D speed);
 
-    Vector2D getPosition();
-    Dimensions getDimensions();
-
-    void setSpeed(const Vector2D speed);
-
-    virtual void modifyMovement() = 0;
-    virtual void updatePosition() = 0;
-
+    // Check if object is on any of the screen boundaries
     void checkIsOnBoundaries();
     bool isOnTopBoundary();
     bool isOnBottomBoundary();
     bool isOnLeftBoundary();
     bool isOnRightBoundary();
 
-    float getLeftBoundary();
-    float getRightBoundary();
-    float getTopBoundary();
-    float getBottomBoundary();
+    // Updates object position
+    void updatePosition();
 
-    Boundaries getBoundaries();
-    Boundaries getFutureBoundaries();
+    virtual void modifySpeed() = 0;
 
 protected:
-    Vector2D m_position;
-    Dimensions m_dimensions;
+    Vec2D m_position;
+    Vec2D m_dimensions;
 
-    Vector2D m_speed;
+    Vec2D m_speed;
 
     bool m_isOnTopBound;
     bool m_isOnBottomBound;
     bool m_isOnLeftBound;
     bool m_isOnRightBound;
-
 };
 
 #endif

@@ -4,26 +4,23 @@
 #include <GL/glut.h>
 #include <GL/freeglut.h>
 
-Engine::Engine(){
-
+Engine::Engine() : m_paddleL(Vec2D(0.02f, 0.32f)), 
+                m_paddleR(Vec2D(0.02f, 0.32f)), 
+                m_ball(Vec2D(0.025f, 0.04f)) {
 }
 
 Engine::~Engine(){
-
 }
 
+/** Inits objects positions and ball speed */
 void Engine::initObjects(){
-    // Init objects positions and dimensions
     m_paddleL.setPosition(-0.9f, 0.0f);
-    m_paddleL.setDimensions(0.02f, 0.32f);
     m_paddleR.setPosition(0.9f, 0.0f);
-    m_paddleR.setDimensions(0.02f, 0.32f);
     m_ball.setPosition(0.0f, 0.0f);
-    m_ball.setDimensions(0.025f, 0.04f);
-
-    setObjectSpeed(ObjectType::Ball, Vector2D(SPEED_UNIT, SPEED_UNIT));    
+    m_ball.setSpeed(Vec2D(SPEED_UNIT, SPEED_UNIT));
 }
 
+/** Returns by reference an object (the object returned depends on the input parameter) */ 
 Object& Engine::getObject(ObjectType objectType) {
     if (objectType == ObjectType::PaddleLeft)
         return m_paddleL;
@@ -33,56 +30,61 @@ Object& Engine::getObject(ObjectType objectType) {
         return m_ball;        
 }
 
-Vector2D Engine::getObjectPosition(ObjectType objectType) {
-    Object &obj = getObject(objectType);
-    return obj.getPosition();
-}
-
-Dimensions Engine::getObjectDimensions(ObjectType objectType) {
-    Object &obj = getObject(objectType);
-    return obj.getDimensions();
-}
-
+/** Returns object boundaries */
 Boundaries Engine::getObjectBoundaries(ObjectType objectType) {
     Object &obj = getObject(objectType);
     return obj.getBoundaries();
 }
 
+/** Returns object boundaries after next movement */
 Boundaries Engine::getFutureObjectBoundaries(ObjectType objectType) {
     Object &obj = getObject(objectType);
-    return obj.getBoundaries();
+    return obj.getFutureBoundaries();
 }
 
-void Engine::setObjectSpeed(ObjectType objectType, Vector2D speed) {
-    Object &obj = getObject(objectType);
-    obj.setSpeed(speed);
-}
-
+/** Returns left player score */
 int Engine::getLeftScore() {
     return m_paddleL.getScore();
 }
 
+/** Returns right player score */
 int Engine::getRightScore() {
     return m_paddleR.getScore();
 }
 
+/** Sets the speed of the object passed as parameter */
+void Engine::setObjectSpeed(ObjectType objectType, Vec2D speed) {
+    Object &obj = getObject(objectType);
+    obj.setSpeed(speed);
+}
+
 /** Does all game mechanics computations to update for next frame */
 void Engine::refreshNextFrame() {
-    followBall();
+    // Checks game events that affect score or object's speed
     checkCollisions();
-    checkGoal();
-    modifyMovement();
-    updatePositions();
+    bool goalScored = checkGoalAddScore();
+    // If a goal has been scored, set all objects positions to the initial ones
+    if (goalScored)
+        initObjects();
+    else
+    {
+        // Modify objects' speeds accordingly
+        modifySpeed();
+        followBallPaddleR();
+        // Update objects' positions 
+        updatePositions();
+        resetPaddlesSpeed();
+    }
 }
 
 /** Makes necessary movements so that right paddle follows the ball vertically */
-void Engine::followBall() {
-    Vector2D ballPosition = m_ball.getPosition();
-    Vector2D paddlePosition = m_paddleR.getPosition();
+void Engine::followBallPaddleR() {
+    Vec2D ballPosition = m_ball.getPosition();
+    Vec2D paddlePosition = m_paddleR.getPosition();
     if (ballPosition.y > paddlePosition.y)
-        m_paddleR.setSpeed(Vector2D(0.0f, 3.0f * SPEED_UNIT));
+        m_paddleR.setSpeed(Vec2D(0.0f, 3.0f * SPEED_UNIT));
     else if (ballPosition.y < paddlePosition.y)
-        m_paddleR.setSpeed(Vector2D(0.0f, -3.0f * SPEED_UNIT));
+        m_paddleR.setSpeed(Vec2D(0.0f, -3.0f * SPEED_UNIT));
 }
 
 /** Checks if there are collisions and modifies movement accordingly */
@@ -92,35 +94,42 @@ void Engine::checkCollisions() {
     m_paddleR.checkIsOnBoundaries();
     m_ball.checkIsOnBoundaries();
 
-    // Check collision between ball and paddle
-    Boundaries bFutL = getFutureObjectBoundaries(ObjectType::PaddleLeft);
-    m_ball.checkCollision(bFutL);
-    Boundaries bFutR = getFutureObjectBoundaries(ObjectType::PaddleRight);
-    m_ball.checkCollision(bFutR);
+    // Check collision between ball and paddles
+    Boundaries boubdFutL = getFutureObjectBoundaries(ObjectType::PaddleLeft);
+    Boundaries boubdFutR = getFutureObjectBoundaries(ObjectType::PaddleRight);
+    m_ball.checkPaddlesCollision(boubdFutL, boubdFutR);
 }
 
 /** Check if a goal is scored, in this case add point and reset object positions */
-void Engine::checkGoal() {
-    m_ball.checkGoal(m_goalLeftPlayer, m_goalRightPlayer);
-    if (m_goalLeftPlayer)
+bool Engine::checkGoalAddScore() {
+    // Check if goal has been scored
+    bool goalLeftPlayer, goalRightPlayer;
+    m_ball.checkGoal(goalLeftPlayer, goalRightPlayer);
+    // If a goal has been scored, add point to the appropriate player
+    if (goalLeftPlayer)
         m_paddleR.addOnePoint();
-    if (m_goalRightPlayer)
-        m_paddleL.addOnePoint();    
-    if (m_goalLeftPlayer || m_goalRightPlayer)
-        initObjects();
+    if (goalRightPlayer)
+        m_paddleL.addOnePoint();
+    return goalLeftPlayer || goalRightPlayer;
 }
 
 /** Modify movement of the objects according to the computed collisions */
-void Engine::modifyMovement() {
-    m_paddleL.modifyMovement();
-    m_paddleR.modifyMovement();
-    m_ball.modifyMovement();
+void Engine::modifySpeed() {
+    m_paddleL.modifySpeed();
+    m_paddleR.modifySpeed();
+    m_ball.modifySpeed();
 }
 
 /** Updates moving objects position */
 void Engine::updatePositions() {
+    // Updates positions of the objects
     m_ball.updatePosition();
     m_paddleL.updatePosition();
     m_paddleR.updatePosition();
 }
 
+/** Sets the paddles speeds to zero */
+void Engine::resetPaddlesSpeed() {
+    m_paddleL.setSpeed(Vec2D(0.0f, 0.0f));
+    m_paddleR.setSpeed(Vec2D(0.0f, 0.0f));
+}

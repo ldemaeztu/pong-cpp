@@ -5,19 +5,21 @@
 
 class Ball : public Object {
 public:
-    Ball();
+    Ball(Vec2D dim);
     ~Ball();
 
-    void checkCollision(Boundaries paddleBound);
+    void checkPaddlesCollision(Boundaries paddleBoundL, Boundaries paddleBoundR);
     Boundaries computeOverlap(Boundaries paddleBound, Boundaries ballBound);
-
-    void modifyMovement();
-    void updatePosition();
-
     void checkGoal(bool& goalLeftPlayer, bool& goalRightPlayer);    
 
-private:
+    void modifySpeed();
 
+private:
+    void checkPaddleCollision(Boundaries paddleBound, bool& verticalCollision, bool& horizontalCollision);
+
+private:
+    bool m_verticalCollision;
+    bool m_horizontalCollision;
 };
 
 #endif
