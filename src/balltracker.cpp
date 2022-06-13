@@ -27,7 +27,7 @@ void BallTracker::init(){
     C << 1, 0;
 
     // Reasonable covariance matrices
-    Q << .05, 10.0, 10.0, .05;
+    Q << .1, 10.0, 10.0, .1;
     R << 5.0;
     P << .1, .1, .1, .1;
 

@@ -71,11 +71,11 @@ void Engine::refreshNextFrame() {
     if (goalScored)
         initObjects();
     else {
-        // Modify objects' speeds accordingly
-        modifySpeed();
         // Estimate and update right paddle speed to follow ball
         float speed = m_ballTracker.update(m_ball.getPosition().y, m_paddleR.getPosition().y);
         m_paddleR.setSpeed(Vec2D(0.0f, 10.0f * speed * SPEED_UNIT));
+        // Modify objects' speeds accordingly
+        modifySpeed();        
         // Update objects' positions 
         updatePositions();
         resetPaddlesSpeed();
