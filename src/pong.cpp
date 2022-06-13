@@ -23,6 +23,7 @@ void keySpecialFunc(const int key, const int x, const int y) {
 void keyKeyboardFunc(const unsigned char key, const int x, const int y) {
 	switch(key){
         case 'q':
+        case 'Q':
             exit(0);
 	}    
 }

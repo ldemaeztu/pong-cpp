@@ -12,12 +12,16 @@ Engine::Engine() : m_paddleL(Vec2D(0.02f, 0.32f)),
 Engine::~Engine(){
 }
 
-/** Inits objects positions and ball speed */
+/** Inits objects game objects each time the game is restarted (game start and after each scored goal) */
 void Engine::initObjects(){
+    // Init objects positions
     m_paddleL.setPosition(-0.9f, 0.0f);
     m_paddleR.setPosition(0.9f, 0.0f);
     m_ball.setPosition(0.0f, 0.0f);
+    // Init ball speed
     m_ball.setSpeed(Vec2D(SPEED_UNIT, SPEED_UNIT));
+    // Init ball tracker
+    m_ballTracker.init();
 }
 
 /** Returns by reference an object (the object returned depends on the input parameter) */ 
@@ -66,11 +70,12 @@ void Engine::refreshNextFrame() {
     // If a goal has been scored, set all objects positions to the initial ones
     if (goalScored)
         initObjects();
-    else
-    {
+    else {
         // Modify objects' speeds accordingly
         modifySpeed();
-        followBallPaddleR();
+        // Estimate and update right paddle speed to follow ball
+        float speed = m_ballTracker.update(m_ball.getPosition().y, m_paddleR.getPosition().y);
+        m_paddleR.setSpeed(Vec2D(0.0f, 10.0f * speed * SPEED_UNIT));
         // Update objects' positions 
         updatePositions();
         resetPaddlesSpeed();
@@ -80,10 +85,10 @@ void Engine::refreshNextFrame() {
 /** Makes necessary movements so that right paddle follows the ball vertically */
 void Engine::followBallPaddleR() {
     Vec2D ballPosition = m_ball.getPosition();
-    Vec2D paddlePosition = m_paddleR.getPosition();
-    if (ballPosition.y > paddlePosition.y)
+    Boundaries paddleBound = m_paddleR.getBoundaries();
+    if (ballPosition.y > paddleBound.b)
         m_paddleR.setSpeed(Vec2D(0.0f, 3.0f * SPEED_UNIT));
-    else if (ballPosition.y < paddlePosition.y)
+    else if (ballPosition.y < paddleBound.t)
         m_paddleR.setSpeed(Vec2D(0.0f, -3.0f * SPEED_UNIT));
 }
 

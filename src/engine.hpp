@@ -3,6 +3,8 @@
 
 #include "ball.hpp"
 #include "paddle.hpp"
+#include "kalman.hpp"
+#include "balltracker.hpp"
 
 #define SPEED_UNIT 0.01f
 
@@ -34,6 +36,10 @@ public:
     // Set object properties
     void setObjectSpeed(const ObjectType objectType, const Vec2D speed);
 
+    // AI-controlled paddle movement computation
+    void initKalman();
+    void updateKalman(float ballY);
+
     // Game mechanics 
     void refreshNextFrame();
     void followBallPaddleR();
@@ -48,6 +54,7 @@ private:
     Paddle m_paddleL;
     Paddle m_paddleR;
     Ball m_ball;
+    BallTracker m_ballTracker;
 };
 
 #endif

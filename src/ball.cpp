@@ -1,7 +1,6 @@
 #include "ball.hpp"
 
 #include <algorithm>
-#include <iostream>
 
 Ball::Ball(Vec2D dim) : Object(dim), m_verticalCollision(false), m_horizontalCollision(false) {
 
