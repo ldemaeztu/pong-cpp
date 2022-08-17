@@ -8,14 +8,9 @@ public:
     Ball(Vec2D dim);
     ~Ball();
 
-    void checkPaddlesCollision(Boundaries paddleBoundL, Boundaries paddleBoundR);
-    Boundaries computeOverlap(Boundaries paddleBound, Boundaries ballBound);
     void checkGoal(bool& goalLeftPlayer, bool& goalRightPlayer);    
-
-    void modifySpeed();
-
-private:
-    void checkPaddleCollision(Boundaries paddleBound, bool& verticalCollision, bool& horizontalCollision);
+    void updateSpeed();
+    void updateCollision(const bool horizontal, const bool vertical);
 
 private:
     bool m_verticalCollision;

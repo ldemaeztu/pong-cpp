@@ -20,7 +20,7 @@ void Paddle::addOnePoint() {
 }
 
 /** Stop the paddle if it has reached a screen boundary */
-void Paddle::modifySpeed() {
+void Paddle::updateSpeed() {
     if (m_isOnTopBound)
         m_speed.y = std::max(0.0f, m_speed.y);
     if (m_isOnBottomBound)

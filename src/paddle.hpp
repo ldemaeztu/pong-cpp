@@ -11,7 +11,7 @@ public:
     int getScore();
     void addOnePoint();
 
-    void modifySpeed();
+    void updateSpeed();
 
 private:
     int m_score;

@@ -8,12 +8,6 @@
 
 #define SPEED_UNIT 0.01f
 
-enum class ObjectType {
-  PaddleLeft,
-  PaddleRight,
-  Ball
-};
-
 class Engine {
 public:
     Engine();
@@ -27,11 +21,9 @@ public:
 
     // Get object properties
     Boundaries getObjectBoundaries(const ObjectType objectType);
-    Boundaries getFutureObjectBoundaries(const ObjectType objectType);
 
     // Get game score
-    int getLeftScore();
-    int getRightScore();
+    int getPlayerScore(const ObjectType objectType);
 
     // Set object properties
     void setObjectSpeed(const ObjectType objectType, const Vec2D speed);
@@ -45,9 +37,11 @@ public:
     void followBallPaddleR();
     void checkCollisions();
     bool checkGoalAddScore();
-    void modifySpeed();
+    void updateSpeed();
     void updatePositions();
     void resetPaddlesSpeed();
+
+    void checkBallPaddleCollision(ObjectType objectType);
 
 private:
     // Game objects

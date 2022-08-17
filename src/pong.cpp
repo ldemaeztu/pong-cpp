@@ -32,12 +32,12 @@ void drawScores() {
     // Draws score left player
     glColor3f(1.0f, 0.0f, 0.0f); 
     glRasterPos2f(-0.5f, 0.9f);
-    std::string text1 = std::to_string(engine.getLeftScore());
+    std::string text1 = std::to_string(engine.getPlayerScore(ObjectType::PaddleLeft));
     glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)text1.c_str());
     // Draws score right player
     glColor3f(0.0f, 1.0f, 0.0f); 
     glRasterPos2f(0.5f, 0.9f);
-    std::string text2 = std::to_string(engine.getRightScore());
+    std::string text2 = std::to_string(engine.getPlayerScore(ObjectType::PaddleRight));
     glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)text2.c_str());
 }
 

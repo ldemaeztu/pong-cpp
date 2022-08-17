@@ -15,6 +15,11 @@ Vec2D Object::getPosition() {
     return m_position;
 }
 
+/** Returns object's speed */
+Vec2D Object::getSpeed() {
+    return m_speed;
+}
+
 /** Sets object's central position */
 void Object::setPosition(const float x, const float y) {
     m_position.x = x;
@@ -29,12 +34,6 @@ void Object::setSpeed(const Vec2D speed) {
 /** Returns object's boundaries */
 Boundaries Object::getBoundaries() {
     Boundaries b(getLeftBoundary(), getRightBoundary(), getTopBoundary(), getBottomBoundary());
-    return b;
-}
-
-/** Returns object's boundaries after next movement */
-Boundaries Object::getFutureBoundaries() {
-    Boundaries b(getLeftBoundary() + m_speed.x, getRightBoundary() + m_speed.x, getTopBoundary() + m_speed.y, getBottomBoundary() + m_speed.y);
     return b;
 }
 
@@ -56,6 +55,15 @@ float Object::getTopBoundary() {
 /** Returns y coordinate of the bottom boundary of the object */
 float Object::getBottomBoundary() {
     return m_position.y + m_dimensions.y/2.0f;
+}
+
+/** Returns object's segments */
+void Object::getSegments(Segment& leftSegment, Segment& rightSegment, Segment& topSegment, Segment& bottomSegment) {
+    Boundaries boundaries = getBoundaries();
+    leftSegment = Segment(Vec2D(boundaries.l, boundaries.t), Vec2D(boundaries.l, boundaries.b));
+    rightSegment = Segment(Vec2D(boundaries.r, boundaries.t), Vec2D(boundaries.r, boundaries.b));
+    topSegment = Segment(Vec2D(boundaries.l, boundaries.t), Vec2D(boundaries.r, boundaries.t));
+    bottomSegment = Segment(Vec2D(boundaries.l, boundaries.b), Vec2D(boundaries.r, boundaries.b));    
 }
 
 /** Checks if object is over any of the screen boundaries */
