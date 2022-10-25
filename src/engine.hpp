@@ -6,8 +6,6 @@
 #include "kalman.hpp"
 #include "balltracker.hpp"
 
-#define SPEED_UNIT 0.01f
-
 class Engine {
 public:
     Engine();
@@ -40,6 +38,7 @@ public:
     void updateSpeed();
     void updatePositions();
     void resetPaddlesSpeed();
+    float computeReboundAngle(Segment paddleSegment, Vec2D intersectionPoint, bool isRightPaddle);
 
     void checkBallPaddleCollision(ObjectType objectType);
 

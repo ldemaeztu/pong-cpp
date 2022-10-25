@@ -1,10 +1,13 @@
 #include "engine.hpp"
 
 #include <iostream>
+#include <numbers> 
+
 #include <GL/glut.h>
 #include <GL/freeglut.h>
 
 #include "geometry.hpp"
+
 
 Engine::Engine() : m_paddleL(Vec2D(0.02f, 0.32f)), 
                 m_paddleR(Vec2D(0.02f, 0.32f)), 
@@ -98,7 +101,7 @@ void Engine::checkBallPaddleCollision(ObjectType objectType) {
     Vec2D ballSpeed = m_ball.getSpeed();
     Vec2D paddleSpeed = paddle.getSpeed();
 
-    // Computes a line from the initial ball position to the final ball position minus the paddle movement
+    // Compute a line from the initial ball position to the final ball position minus the paddle movement
     Vec2D ballInitialPoint = ballPosition;
     Vec2D ballFinalPoint = ballPosition + ballSpeed - paddleSpeed;
     Segment ballSegment(ballInitialPoint, ballFinalPoint);
@@ -108,15 +111,41 @@ void Engine::checkBallPaddleCollision(ObjectType objectType) {
     paddle.getSegments(paddleLeftSegment, paddleRightSegment, paddleTopSegment, paddleBottomSegment);
     Segment paddleSideSegment = objectType == ObjectType::PaddleLeft ? paddleRightSegment : paddleLeftSegment;
 
-    // Intersects this line with the boundaries of the paddle to check if there is a collision
+    // Intersect this line with the boundaries of the paddle to check if there is a collision
     Vec2D intersectionSide = Geometry::computeSegmentsIntersection(ballSegment, paddleSideSegment);
     Vec2D intersectionTop = Geometry::computeSegmentsIntersection(ballSegment, paddleTopSegment);
     Vec2D intersectionBottom = Geometry::computeSegmentsIntersection(ballSegment, paddleBottomSegment);
 
-    bool horizonalCollision = !std::isnan(intersectionSide.x); 
+    // Decide if there has been a collision with the side of the paddle (horizontal collision)    
+    // or with the top or bottom of the paddle (vertical collision)
+    bool horizontalCollision = !std::isnan(intersectionSide.x); 
     bool verticalCollision = (!std::isnan(intersectionTop.x) && ballSpeed.y > 0) || 
         (!std::isnan(intersectionBottom.x) && ballSpeed.y < 0); 
-    m_ball.updateCollision(horizonalCollision, verticalCollision);
+
+    // If there is an horizontal collision, compute the rebound angle
+    float angle = 0.0f;
+    if (horizontalCollision)
+        angle = computeReboundAngle(paddleSideSegment, intersectionSide, objectType == ObjectType::PaddleRight);
+
+    // Update collision information
+    m_ball.updateCollision(horizontalCollision, verticalCollision, angle);
+}
+
+/** Computes the rebound angle after an horizontal paddle-ball collision */
+float Engine::computeReboundAngle(Segment paddleSegment, Vec2D intersectionPoint, bool isRightPaddle) {
+    // Compute the relative position of the intersection point inside the paddle segment
+    float middlePointY = (paddleSegment.p1.y + paddleSegment.p2.y) / 2.0;
+    float length = abs(paddleSegment.p1.y - paddleSegment.p2.y) / 2.0;
+    float horizontalCollisionPosition = (intersectionPoint.y - middlePointY) / length;
+
+    // Transform collision position to rebound angle
+    float angle = horizontalCollisionPosition * std::numbers::pi / 3.0;
+
+    // If it was the right paddle, adapt the rebound angle
+    if (isRightPaddle)
+        angle = angle >= 0.0 ? std::numbers::pi - angle : -std::numbers::pi - angle;
+    
+    return angle;
 }
 
 /** Makes necessary movements so that right paddle follows the ball vertically */
