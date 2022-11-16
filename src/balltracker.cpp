@@ -5,7 +5,7 @@
 BallTracker::BallTracker() {
     // Define random generator with Gaussian distribution
     const double mean = 0.0;
-    const double stddev = 0.8;
+    const double stddev = 0.5;
     m_dist = std::normal_distribution<double>(mean, stddev);
 }
 
@@ -39,6 +39,10 @@ void BallTracker::init(){
     m_t = 0;
     x0 << 0.0, 0.0;
     m_kf.init(m_t, x0);
+
+    // Init to a stable position where paddle and ball are at the same position
+    for (int i = 0; i < 4; i++)
+        update(0.0f, 0.0f);
 }
 
 /** Estimate paddle speed given the position of the ball and the position of the paddle */
