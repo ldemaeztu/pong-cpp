@@ -9,29 +9,36 @@
 #include "geometry.hpp"
 
 
-Engine::Engine() : m_paddleL(Vec2D(0.02f, 0.32f)), 
-                m_paddleR(Vec2D(0.02f, 0.32f)), 
-                m_ball(Vec2D(0.025f, 0.04f)) {
+Engine::Engine(ConfigLoader* configManager) : 
+                m_config(configManager),
+                m_paddleL(Vec2D(configManager->get<float>("pL", "w"), configManager->get<float>("pL", "h"))),
+                m_paddleR(Vec2D(configManager->get<float>("pR", "w"), configManager->get<float>("pR", "h"))),
+                m_ball(configManager, Vec2D(configManager->get<float>("b", "w"), configManager->get<float>("b", "h"))),
+                m_ballTracker(configManager) {
 }
 
-Engine::~Engine(){
+Engine::~Engine() {
 }
 
 /** Inits objects game objects each time the game is restarted (game start and after each scored goal) */
-void Engine::initObjects(){
+void Engine::initObjects() {
     // Init objects positions
-    m_paddleL.setPosition(-0.9f, 0.0f);
-    m_paddleR.setPosition(0.9f, 0.0f);
-    m_ball.setPosition(0.0f, 0.0f);
+    m_paddleL.setPosition(m_config->get<float>("pL", "x"), m_config->get<float>("pL", "y"));
+    m_paddleR.setPosition(m_config->get<float>("pR", "x"), m_config->get<float>("pR", "y"));
+    m_ball.setPosition(m_config->get<float>("b", "x"), m_config->get<float>("b", "y"));
     // Init ball speed
-    m_ball.setSpeed(Vec2D(SPEED_UNIT, SPEED_UNIT));
+    m_ball.setSpeed(Vec2D(m_config->get<float>("g", "speed_unit") * cos(M_PI/4), m_config->get<float>("g", "speed_unit") * sin(M_PI/4)));
     // Init ball tracker
     m_ballTracker.init();
 }
 
 /** Returns by reference an object (the object returned depends on the input parameter) */ 
 Object& Engine::getObject(ObjectType objectType) {
-    assert(objectType == ObjectType::PaddleLeft || objectType == ObjectType::PaddleRight || objectType == ObjectType::Ball);
+    assert(
+        objectType == ObjectType::PaddleLeft 
+        || objectType == ObjectType::PaddleRight 
+        || objectType == ObjectType::Ball
+    );
     Object *obj;
     if (objectType == ObjectType::PaddleLeft)
         obj = &m_paddleL;
@@ -54,9 +61,13 @@ int Engine::getPlayerScore(const ObjectType objectType) {
     return objectType == ObjectType::PaddleLeft ? m_paddleL.getScore() : m_paddleR.getScore();
 }
 
-/** Sets the speed of the object passed as parameter */
-void Engine::setObjectSpeed(ObjectType objectType, Vec2D speed) {
+/** Sets the direction of the object passed as parameter (0: down, 1: up) */
+void Engine::setObjectDirection(ObjectType objectType, bool direction) {
     Object &obj = getObject(objectType);
+    float speed_multiplier = m_config->get<float>("pR", "speed_multiplier");
+    float speed_unit = m_config->get<float>("g", "speed_unit");
+    float direction_modifier = direction ? 1.0f : -1.0f; 
+    Vec2D speed = Vec2D(0.0f, direction_modifier * speed_multiplier * speed_unit);
     obj.setSpeed(speed);
 }
 
@@ -70,8 +81,9 @@ void Engine::refreshNextFrame() {
         initObjects();
     else {
         // Estimate and update right paddle speed to follow ball
-        float speed = m_ballTracker.update(m_ball.getPosition().y, m_paddleR.getPosition().y);
-        m_paddleR.setSpeed(Vec2D(0.0f, 10.0f * speed * SPEED_UNIT));
+        float speed_estimation = m_ballTracker.update(m_ball.getPosition().y, m_paddleR.getPosition().y);
+        float speed_unit = m_config->get<float>("g", "speed_unit");
+        m_paddleR.setSpeed(Vec2D(0.0f, speed_estimation * speed_unit));
         // Modify objects' speeds
         updateSpeed();        
         // Update objects' positions 
@@ -139,23 +151,13 @@ float Engine::computeReboundAngle(Segment paddleSegment, Vec2D intersectionPoint
     float horizontalCollisionPosition = (intersectionPoint.y - middlePointY) / length;
 
     // Transform collision position to rebound angle
-    float angle = horizontalCollisionPosition * std::numbers::pi / 3.0;
+    float angle = horizontalCollisionPosition * std::numbers::pi / m_config->get<float>("g", "angle_divisor");
 
     // If it was the right paddle, adapt the rebound angle
     if (isRightPaddle)
         angle = angle >= 0.0 ? std::numbers::pi - angle : -std::numbers::pi - angle;
     
     return angle;
-}
-
-/** Makes necessary movements so that right paddle follows the ball vertically */
-void Engine::followBallPaddleR() {
-    Vec2D ballPosition = m_ball.getPosition();
-    Boundaries paddleBound = m_paddleR.getBoundaries();
-    if (ballPosition.y > paddleBound.b)
-        m_paddleR.setSpeed(Vec2D(0.0f, 3.0f * SPEED_UNIT));
-    else if (ballPosition.y < paddleBound.t)
-        m_paddleR.setSpeed(Vec2D(0.0f, -3.0f * SPEED_UNIT));
 }
 
 /** Check if a goal is scored, in this case add point and reset object positions */

@@ -1,10 +1,14 @@
+#ifndef BALLTRACKER_H
+#define BALLTRACKER_H 
+
 #include <random>
 
+#include "configloader.hpp"
 #include "kalman.hpp"
 
 class BallTracker {
 public:
-    BallTracker();
+    BallTracker(ConfigLoader* configManager);
     void init();
     float update(const float ballY, const float paddleY);
 
@@ -17,4 +21,9 @@ private:
     // Noise generation objects
     std::normal_distribution<double> m_dist;
     std::default_random_engine m_generator;
+
+    // Config loader
+    ConfigLoader* m_config;     
 };
+
+#endif

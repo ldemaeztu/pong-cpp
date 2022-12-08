@@ -2,6 +2,9 @@
 
 #include <iostream>
     
+Object::Object() : m_speed(0.0f, 0.0f), m_position(0.0f, 0.0f), m_dimensions(0.0f, 0.0f), 
+    m_isOnTopBound(false), m_isOnBottomBound(false), m_isOnLeftBound(false), m_isOnRightBound(false) {
+};    
     
 Object::Object(Vec2D dim) : m_speed(0.0f, 0.0f), m_position(0.0f, 0.0f), m_dimensions(dim), 
     m_isOnTopBound(false), m_isOnBottomBound(false), m_isOnLeftBound(false), m_isOnRightBound(false) {
@@ -18,6 +21,12 @@ Vec2D Object::getPosition() {
 /** Returns object's speed */
 Vec2D Object::getSpeed() {
     return m_speed;
+}
+
+/** Sets object's dimensions */
+void Object::setDimensions(const float w, const float h) {
+    m_dimensions.x = w;
+    m_dimensions.y = h;
 }
 
 /** Sets object's central position */

@@ -49,6 +49,7 @@ enum class ObjectType {
 
 class Object {
 public:
+    Object();
     Object(Vec2D dim);
     ~Object();
 
@@ -59,6 +60,7 @@ public:
     void getSegments(Segment& leftSegment, Segment& rightSegment, Segment& topSegment, Segment& bottomSegment);
 
     // Set object properties
+    void setDimensions(const float w, const float h);
     void setPosition(const float x, const float y);
     void setSpeed(const Vec2D speed);
 

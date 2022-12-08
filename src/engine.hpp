@@ -2,13 +2,14 @@
 #define ENGINE_H    
 
 #include "ball.hpp"
+#include "configloader.hpp"
 #include "paddle.hpp"
 #include "kalman.hpp"
 #include "balltracker.hpp"
 
 class Engine {
 public:
-    Engine();
+    Engine(ConfigLoader *configManager);
     ~Engine();
 
     // Inits all objects in the screen
@@ -24,7 +25,7 @@ public:
     int getPlayerScore(const ObjectType objectType);
 
     // Set object properties
-    void setObjectSpeed(const ObjectType objectType, const Vec2D speed);
+    void setObjectDirection(const ObjectType objectType, bool direction);
 
     // AI-controlled paddle movement computation
     void initKalman();
@@ -32,7 +33,6 @@ public:
 
     // Game mechanics 
     void refreshNextFrame();
-    void followBallPaddleR();
     void checkCollisions();
     bool checkGoalAddScore();
     void updateSpeed();
@@ -47,7 +47,12 @@ private:
     Paddle m_paddleL;
     Paddle m_paddleR;
     Ball m_ball;
+
+    // Tracking of the ball to move computer's paddle
     BallTracker m_ballTracker;
+
+    // Config loader
+    ConfigLoader* m_config;    
 };
 
 #endif

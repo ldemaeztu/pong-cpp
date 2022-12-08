@@ -2,10 +2,10 @@
 
 #include <iostream>
 
-BallTracker::BallTracker() {
+BallTracker::BallTracker(ConfigLoader* configManager) : m_config(configManager) {
     // Define random generator with Gaussian distribution
-    const double mean = 0.0;
-    const double stddev = 0.5;
+    const double mean = m_config->get<float>("bT", "mean");
+    const double stddev = m_config->get<float>("bT", "stddev");
     m_dist = std::normal_distribution<double>(mean, stddev);
 }
 
@@ -14,7 +14,7 @@ void BallTracker::init(){
     int n = 2; // Number of states
     int m = 1; // Number of measurements
 
-    m_dt = 1.0/300; // Time step
+    m_dt = m_config->get<float>("bT", "timestep"); // Time step
 
     Eigen::MatrixXd A(n, n); // System dynamics matrix
     Eigen::MatrixXd C(m, n); // Output matrix
@@ -27,9 +27,13 @@ void BallTracker::init(){
     C << 1, 0;
 
     // Reasonable covariance matrices
-    Q << .1, 10.0, 10.0, .1;
-    R << 5.0;
-    P << .1, .1, .1, .1;
+    float q1 = m_config->get<float>("bT", "q1");
+    float q2 = m_config->get<float>("bT", "q2");
+    float r = m_config->get<float>("bT", "r");
+    float p = m_config->get<float>("bT", "p");
+    Q << q1, q2, q2, q1;
+    R << r;
+    P << p, p, p, p;
 
     // Construct the filter
     m_kf = KalmanFilter(m_dt, A, C, Q, R, P);
@@ -41,7 +45,8 @@ void BallTracker::init(){
     m_kf.init(m_t, x0);
 
     // Init to a stable position where paddle and ball are at the same position
-    for (int i = 0; i < 4; i++)
+    int steps = m_config->get<int>("bT", "stabilization_steps");
+    for (int i = 0; i < steps; i++)
         update(0.0f, 0.0f);
 }
 
@@ -50,10 +55,9 @@ float BallTracker::update(const float ballY, const float paddleY) {
     Eigen::VectorXd y(1);
     m_t += m_dt;
 
-    //y << ballY + m_dist(m_generator);
     y << ballY - paddleY + m_dist(m_generator);
     m_kf.update(y);    
     Eigen::VectorXd ballPosKalman = m_kf.state().transpose();
 
-    return ballPosKalman(0);
+    return m_config->get<float>("bT", "speed_multiplier") * ballPosKalman(0);
 }
