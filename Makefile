@@ -3,9 +3,20 @@ CPPFLAGS=-std=c++20 -lglut -lGL -g
 OPENGL = `pkg-config opengl --cflags --libs`
 EIGEN3_INCLUDE_DIR = /usr/include/eigen3
 LIBS = $(OPENGL)
+SRC_DIR := ./src
+OBJ_DIR := ./obj
+SRC_FILES := $(wildcard $(SRC_DIR)/*.cpp)
+OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC_FILES))
 
-pong: src/pong.cpp src/engine.cpp src/object.cpp src/paddle.cpp src/ball.cpp src/kalman.cpp src/balltracker.cpp src/geometry.cpp src/configloader.cpp
-	$(CC) -w -I $(EIGEN3_INCLUDE_DIR) -o pong src/pong.cpp src/engine.cpp src/object.cpp src/paddle.cpp src/ball.cpp src/kalman.cpp src/balltracker.cpp src/geometry.cpp src/configloader.cpp $(CPPFLAGS)
+TARGET := pong
+
+all: $(TARGET)
+
+$(TARGET): $(OBJ_FILES)
+	$(CC) -w -I $(EIGEN3_INCLUDE_DIR) -o $@ $^ $(CPPFLAGS)
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	$(CC) -I $(EIGEN3_INCLUDE_DIR) $(CPPFLAGS) -c $< -o $@
 
 test: src/geometry.cpp
 	$(CC) -w -I $(EIGEN3_INCLUDE_DIR) -o tests test/test_geometry.cpp src/geometry.cpp /usr/lib/libgtest.a /usr/lib/libgtest_main.a -lpthread $(CPPFLAGS)
