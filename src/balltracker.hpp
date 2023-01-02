@@ -8,7 +8,7 @@
 
 class BallTracker {
 public:
-    BallTracker(ConfigLoader* configManager);
+    BallTracker(ConfigLoader* config);
     void init();
     float update(const float ballY, const float paddleY);
 

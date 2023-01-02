@@ -26,6 +26,7 @@ KalmanFilter::KalmanFilter(
 
 KalmanFilter::KalmanFilter() {}
 
+/** Initialize filter */
 void KalmanFilter::init(double t0, const Eigen::VectorXd& x0) {
   x_hat = x0;
   P = P0;
@@ -34,6 +35,7 @@ void KalmanFilter::init(double t0, const Eigen::VectorXd& x0) {
   initialized = true;
 }
 
+/** Initialize filter */
 void KalmanFilter::init() {
   x_hat.setZero();
   P = P0;
@@ -42,6 +44,7 @@ void KalmanFilter::init() {
   initialized = true;
 }
 
+/** Update filter state */
 void KalmanFilter::update(const Eigen::VectorXd& y) {
 
   if(!initialized)
@@ -57,6 +60,7 @@ void KalmanFilter::update(const Eigen::VectorXd& y) {
   t += dt;
 }
 
+/** Update filter state */
 void KalmanFilter::update(const Eigen::VectorXd& y, double dt, const Eigen::MatrixXd A) {
 
   this->A = A;

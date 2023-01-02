@@ -9,7 +9,7 @@
 
 class Engine {
 public:
-    Engine(ConfigLoader *configManager);
+    Engine(ConfigLoader *config);
     ~Engine();
 
     // Inits all objects in the screen
@@ -25,7 +25,7 @@ public:
     int getPlayerScore(const ObjectType objectType);
 
     // Set object properties
-    void setObjectDirection(const ObjectType objectType, bool direction);
+    void setPlayerPaddleDirection(bool direction);
 
     // AI-controlled paddle movement computation
     void initKalman();
@@ -35,14 +35,18 @@ public:
     void refreshNextFrame();
     void checkCollisions();
     bool checkGoalAddScore();
-    void updateSpeed();
+    void modifyObjectsSpeeds();
     void updatePositions();
-    void resetPaddlesSpeed();
-    float computeReboundAngle(Segment paddleSegment, Vec2D intersectionPoint, bool isRightPaddle);
-
-    void checkBallPaddleCollision(ObjectType objectType);
 
 private:
+    static Vec2D getPaddleLDims(ConfigLoader* config);
+    static Vec2D getPaddleRDims(ConfigLoader* config);
+    static Vec2D getBallDims(ConfigLoader* config);
+
+private:
+    // Config loader
+    ConfigLoader* m_config;    
+
     // Game objects
     Paddle m_paddleL;
     Paddle m_paddleR;
@@ -50,9 +54,6 @@ private:
 
     // Tracking of the ball to move computer's paddle
     BallTracker m_ballTracker;
-
-    // Config loader
-    ConfigLoader* m_config;    
 };
 
 #endif

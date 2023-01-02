@@ -6,19 +6,22 @@
 
 class Ball : public Object {
 public:
-    Ball(ConfigLoader *configManager, Vec2D dim);
+    Ball(ConfigLoader *config, Vec2D dim);
     ~Ball();
 
     void checkGoal(bool& goalLeftPlayer, bool& goalRightPlayer);    
-    void updateSpeed();
-    void updateCollision(const bool horizontal, const bool vertical, const float angle);
+    void checkBallPaddleCollision(Vec2D padSpeed, Segment padSideSegm, 
+                                  Segment padTopSegment, Segment padBottomSegment);
+    void updatePosition();
+    void modifySpeed();                                      
 
 private:
-    bool m_verticalCollision;
-    bool m_horizontalCollision;
-    float m_angle;
+    float computeReboundAngle(Segment paddleSegment, Vec2D intersectionPoint);
 
-    ConfigLoader* m_config;
+private:
+    bool m_vertCollision;
+    bool m_horizCollision;
+    float m_angle;
 };
 
 #endif

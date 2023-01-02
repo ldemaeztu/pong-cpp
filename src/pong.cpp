@@ -1,10 +1,11 @@
 #include "configloader.hpp"
-#include "engine.hpp"
+
+#include <iostream>
 
 #include <GL/glut.h>
 #include <GL/freeglut.h>
 
-#include <iostream>
+#include "engine.hpp"
 
 std::unique_ptr<Engine> engine; // Engine that control the game dynamics
 
@@ -12,10 +13,10 @@ std::unique_ptr<Engine> engine; // Engine that control the game dynamics
 void keySpecialFunc(const int key, const int x, const int y) {
 	switch(key){
 		case GLUT_KEY_UP:
-            engine->setObjectDirection(ObjectType::PaddleLeft, 1);
+            engine->setPlayerPaddleDirection(1);
 			break;
 		case GLUT_KEY_DOWN:
-			engine->setObjectDirection(ObjectType::PaddleLeft, 0);
+			engine->setPlayerPaddleDirection(0);
 			break;
 	}    
 }
@@ -110,8 +111,8 @@ void initGraphics(int argc, char* argv[]){
 }
 
 int main(int argc, char* argv[]) {
-    std::unique_ptr<ConfigLoader> configManager = std::make_unique<ConfigLoader>("config/pong.conf");
-    engine = std::make_unique<Engine>(configManager.get());
+    std::unique_ptr<ConfigLoader> config = std::make_unique<ConfigLoader>("config/pong.conf");
+    engine = std::make_unique<Engine>(config.get());
     engine->initObjects();
     initGraphics(argc, argv);
 }

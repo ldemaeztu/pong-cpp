@@ -5,13 +5,14 @@
 
 class Paddle : public Object {
 public:
-    Paddle(Vec2D dim);
+    Paddle(ConfigLoader *config, Vec2D dim);
     ~Paddle();
 
     int getScore();
     void addOnePoint();
 
-    void updateSpeed();
+    void updatePosition();
+    void modifySpeed();
 
 private:
     int m_score;

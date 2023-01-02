@@ -2,12 +2,17 @@
 
 #include <iostream>
     
-Object::Object() : m_speed(0.0f, 0.0f), m_position(0.0f, 0.0f), m_dimensions(0.0f, 0.0f), 
-    m_isOnTopBound(false), m_isOnBottomBound(false), m_isOnLeftBound(false), m_isOnRightBound(false) {
+Object::Object() : 
+    m_speed(0.0f, 0.0f), m_position(0.0f, 0.0f), m_dimensions(0.0f, 0.0f), 
+    m_isOnTopBound(false), m_isOnBottomBound(false), 
+    m_isOnLeftBound(false), m_isOnRightBound(false) {
 };    
     
-Object::Object(Vec2D dim) : m_speed(0.0f, 0.0f), m_position(0.0f, 0.0f), m_dimensions(dim), 
-    m_isOnTopBound(false), m_isOnBottomBound(false), m_isOnLeftBound(false), m_isOnRightBound(false) {
+Object::Object(ConfigLoader *config, Vec2D dim) : 
+    m_speed(0.0f, 0.0f), m_position(0.0f, 0.0f), 
+    m_dimensions(dim), m_config(config),
+    m_isOnTopBound(false), m_isOnBottomBound(false), 
+    m_isOnLeftBound(false), m_isOnRightBound(false) {
 };
 
 Object::~Object() {
@@ -16,6 +21,11 @@ Object::~Object() {
 /** Returns object's central position */
 Vec2D Object::getPosition() {
     return m_position;
+}
+
+/** Returns if object is on left half of the screen */
+bool Object::isOnLeftHalf() {
+    return m_position.x < 0.0f;
 }
 
 /** Returns object's speed */
@@ -42,7 +52,8 @@ void Object::setSpeed(const Vec2D speed) {
 
 /** Returns object's boundaries */
 Boundaries Object::getBoundaries() {
-    Boundaries b(getLeftBoundary(), getRightBoundary(), getTopBoundary(), getBottomBoundary());
+    Boundaries b(getLeftBoundary(), getRightBoundary(), 
+                 getTopBoundary(), getBottomBoundary());
     return b;
 }
 
@@ -101,10 +112,4 @@ bool Object::isOnLeftBoundary() {
 /** Checks if object is over the right screen boundary */
 bool Object::isOnRightBoundary() {
     return getRightBoundary() >= SCREEN_LIMIT;
-}
-
-/** Updates object position */
-void Object::updatePosition() {
-    m_position.x += m_speed.x;
-    m_position.y += m_speed.y;
 }

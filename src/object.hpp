@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <limits>
 
+#include "configloader.hpp"
+
 #define SCREEN_LIMIT 0.99f
 
 struct Boundaries {
@@ -33,6 +35,26 @@ struct Vec2D {
     }
 };
 
+struct Vec3D {
+    Vec3D() : x(std::numeric_limits<float>::quiet_NaN()), 
+        y(std::numeric_limits<float>::quiet_NaN()), 
+        z(std::numeric_limits<float>::quiet_NaN()) {};
+    Vec3D(const float x_, const float y_, const float z_) : x(x_), y(y_), z(z_) {};
+    float x;
+    float y;
+    float z;
+
+    Vec3D operator+(Vec3D v)
+    {
+        return Vec3D(x + v.x, y + v.y, z + v.z);
+    }
+
+    Vec3D operator-(Vec3D v)
+    {
+        return Vec3D(x - v.x, y - v.y, z - v.z);
+    }
+};
+
 struct Segment
 {
     Segment() {};
@@ -50,14 +72,16 @@ enum class ObjectType {
 class Object {
 public:
     Object();
-    Object(Vec2D dim);
+    Object(ConfigLoader *config, Vec2D dim);
     ~Object();
 
     // Get object properties
     Vec2D getPosition();
     Vec2D getSpeed();
     Boundaries getBoundaries();
-    void getSegments(Segment& leftSegment, Segment& rightSegment, Segment& topSegment, Segment& bottomSegment);
+    void getSegments(Segment& leftSegment, Segment& rightSegment, 
+                     Segment& topSegment, Segment& bottomSegment);
+    bool isOnLeftHalf();
 
     // Set object properties
     void setDimensions(const float w, const float h);
@@ -71,10 +95,9 @@ public:
     bool isOnLeftBoundary();
     bool isOnRightBoundary();
 
-    // Updates object position
-    void updatePosition();
-
-    virtual void updateSpeed() = 0;
+    // Updates object position and speed
+    virtual void updatePosition() = 0;
+    virtual void modifySpeed() = 0;
 
 private:
     float getLeftBoundary();
@@ -92,6 +115,8 @@ protected:
     bool m_isOnBottomBound;
     bool m_isOnLeftBound;
     bool m_isOnRightBound;
+
+    ConfigLoader* m_config;
 };
 
 #endif

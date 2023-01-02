@@ -10,7 +10,6 @@ public:
     template <class T>
     T get(std::string section, std::string param) const
     {
-        //std::stringstream convert(m_config[section][param]);
         std::stringstream convert(m_config.get(section).get(param));
         T value;
         convert >> value;

@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-BallTracker::BallTracker(ConfigLoader* configManager) : m_config(configManager) {
+BallTracker::BallTracker(ConfigLoader* config) : m_config(config) {
     // Define random generator with Gaussian distribution
     const double mean = m_config->get<float>("bT", "mean");
     const double stddev = m_config->get<float>("bT", "stddev");

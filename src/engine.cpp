@@ -8,26 +8,53 @@
 
 #include "geometry.hpp"
 
-
-Engine::Engine(ConfigLoader* configManager) : 
-                m_config(configManager),
-                m_paddleL(Vec2D(configManager->get<float>("pL", "w"), configManager->get<float>("pL", "h"))),
-                m_paddleR(Vec2D(configManager->get<float>("pR", "w"), configManager->get<float>("pR", "h"))),
-                m_ball(configManager, Vec2D(configManager->get<float>("b", "w"), configManager->get<float>("b", "h"))),
-                m_ballTracker(configManager) {
+Engine::Engine(ConfigLoader* config) :
+    m_config(config),
+    m_paddleL(config, getPaddleLDims(config)),
+    m_paddleR(config, getPaddleRDims(config)),
+    m_ball(config, getBallDims(config)),
+    m_ballTracker(config) {
 }
 
 Engine::~Engine() {
 }
 
-/** Inits objects game objects each time the game is restarted (game start and after each scored goal) */
+/** Returns left paddle dimensions */
+Vec2D Engine::getPaddleLDims(ConfigLoader* config) {
+    float w = config->get<float>("pL", "w");
+    float h = config->get<float>("pL", "h");
+    return Vec2D(w, h);
+}
+
+/** Returns right paddle dimensions */
+Vec2D Engine::getPaddleRDims(ConfigLoader* config) {
+    float w = config->get<float>("pR", "w");
+    float h = config->get<float>("pR", "h");
+    return Vec2D(w, h);
+}
+
+/** Returns ball dimensions */
+Vec2D Engine::getBallDims(ConfigLoader* config) {
+    float w = config->get<float>("b", "w");
+    float h = config->get<float>("b", "h");
+    return Vec2D(w, h);
+}
+
+/** Inits objects game objects each time the game is restarted (start and goals) */
 void Engine::initObjects() {
-    // Init objects positions
-    m_paddleL.setPosition(m_config->get<float>("pL", "x"), m_config->get<float>("pL", "y"));
-    m_paddleR.setPosition(m_config->get<float>("pR", "x"), m_config->get<float>("pR", "y"));
-    m_ball.setPosition(m_config->get<float>("b", "x"), m_config->get<float>("b", "y"));
+    // Init paddles and ball positions
+    float xL = m_config->get<float>("pL", "x");
+    float yL = m_config->get<float>("pL", "y");
+    m_paddleL.setPosition(xL, yL);
+    float xR = m_config->get<float>("pR", "x");
+    float yR = m_config->get<float>("pR", "y");
+    m_paddleR.setPosition(xR, yR);
+    float xB = m_config->get<float>("b", "x");
+    float yB = m_config->get<float>("b", "y");
+    m_ball.setPosition(xB, yB);
     // Init ball speed
-    m_ball.setSpeed(Vec2D(m_config->get<float>("g", "speed_unit") * cos(M_PI/4), m_config->get<float>("g", "speed_unit") * sin(M_PI/4)));
+    float speedUnit = m_config->get<float>("g", "speed_unit");
+    m_ball.setSpeed(Vec2D(speedUnit * cos(M_PI/4), speedUnit * sin(M_PI/4)));
     // Init ball tracker
     m_ballTracker.init();
 }
@@ -37,8 +64,8 @@ Object& Engine::getObject(ObjectType objectType) {
     assert(
         objectType == ObjectType::PaddleLeft 
         || objectType == ObjectType::PaddleRight 
-        || objectType == ObjectType::Ball
-    );
+        || objectType == ObjectType::Ball);
+
     Object *obj;
     if (objectType == ObjectType::PaddleLeft)
         obj = &m_paddleL;
@@ -57,18 +84,21 @@ Boundaries Engine::getObjectBoundaries(ObjectType objectType) {
 
 /** Returns left or right player score */
 int Engine::getPlayerScore(const ObjectType objectType) {
-    assert(objectType == ObjectType::PaddleLeft || objectType == ObjectType::PaddleRight);
-    return objectType == ObjectType::PaddleLeft ? m_paddleL.getScore() : m_paddleR.getScore();
+    assert(objectType == ObjectType::PaddleLeft || 
+           objectType == ObjectType::PaddleRight);
+
+    return objectType == ObjectType::PaddleLeft ? 
+                         m_paddleL.getScore() : m_paddleR.getScore();
 }
 
-/** Sets the direction of the object passed as parameter (0: down, 1: up) */
-void Engine::setObjectDirection(ObjectType objectType, bool direction) {
-    Object &obj = getObject(objectType);
-    float speed_multiplier = m_config->get<float>("pR", "speed_multiplier");
+/** Sets the direction of the player's paddle (0: down, 1: up) */
+void Engine::setPlayerPaddleDirection(bool direction) {
+    // Compute and set speed
+    float speed_multiplier = m_config->get<float>("pL", "speed_multiplier");
     float speed_unit = m_config->get<float>("g", "speed_unit");
     float direction_modifier = direction ? 1.0f : -1.0f; 
     Vec2D speed = Vec2D(0.0f, direction_modifier * speed_multiplier * speed_unit);
-    obj.setSpeed(speed);
+    m_paddleL.setSpeed(speed);
 }
 
 /** Does all game mechanics computations to update for next frame */
@@ -81,14 +111,14 @@ void Engine::refreshNextFrame() {
         initObjects();
     else {
         // Estimate and update right paddle speed to follow ball
-        float speed_estimation = m_ballTracker.update(m_ball.getPosition().y, m_paddleR.getPosition().y);
+        float speed_estimation = 
+            m_ballTracker.update(m_ball.getPosition().y, m_paddleR.getPosition().y);
         float speed_unit = m_config->get<float>("g", "speed_unit");
         m_paddleR.setSpeed(Vec2D(0.0f, speed_estimation * speed_unit));
-        // Modify objects' speeds
-        updateSpeed();        
-        // Update objects' positions 
+
+        // Modify objects' speeds and positions
+        modifyObjectsSpeeds();        
         updatePositions();
-        resetPaddlesSpeed();
     }
 }
 
@@ -99,68 +129,19 @@ void Engine::checkCollisions() {
     m_paddleR.checkIsOnBoundaries();
     m_ball.checkIsOnBoundaries();
 
-    // Check collision between ball and paddles (only with the paddle in this half of the screen)
-    if (m_ball.getPosition().x < 0.0f)
-        checkBallPaddleCollision(ObjectType::PaddleLeft);
-    else
-        checkBallPaddleCollision(ObjectType::PaddleRight);
+    // Check collision between ball and paddles
+    Segment l, r, t, b;
+    if (m_ball.isOnLeftHalf()) {
+        m_paddleL.getSegments(l, r, t, b);
+        m_ball.checkBallPaddleCollision(m_paddleL.getSpeed(), r, t, b);
+    }
+    else {
+        m_paddleR.getSegments(l, r, t, b);
+        m_ball.checkBallPaddleCollision(m_paddleR.getSpeed(), l, t, b);
+    }
 }
 
-/** Checks if there is a collision between the ball and a paddle */
-void Engine::checkBallPaddleCollision(ObjectType objectType) {
-    Paddle paddle = objectType == ObjectType::PaddleLeft ? m_paddleL : m_paddleR;
-    Vec2D ballPosition = m_ball.getPosition();
-    Vec2D ballSpeed = m_ball.getSpeed();
-    Vec2D paddleSpeed = paddle.getSpeed();
-
-    // Compute a line from the initial ball position to the final ball position minus the paddle movement
-    Vec2D ballInitialPoint = ballPosition;
-    Vec2D ballFinalPoint = ballPosition + ballSpeed - paddleSpeed;
-    Segment ballSegment(ballInitialPoint, ballFinalPoint);
-
-    // Get paddle segments
-    Segment paddleLeftSegment, paddleRightSegment, paddleTopSegment, paddleBottomSegment;
-    paddle.getSegments(paddleLeftSegment, paddleRightSegment, paddleTopSegment, paddleBottomSegment);
-    Segment paddleSideSegment = objectType == ObjectType::PaddleLeft ? paddleRightSegment : paddleLeftSegment;
-
-    // Intersect this line with the boundaries of the paddle to check if there is a collision
-    Vec2D intersectionSide = Geometry::computeSegmentsIntersection(ballSegment, paddleSideSegment);
-    Vec2D intersectionTop = Geometry::computeSegmentsIntersection(ballSegment, paddleTopSegment);
-    Vec2D intersectionBottom = Geometry::computeSegmentsIntersection(ballSegment, paddleBottomSegment);
-
-    // Decide if there has been a collision with the side of the paddle (horizontal collision)    
-    // or with the top or bottom of the paddle (vertical collision)
-    bool horizontalCollision = !std::isnan(intersectionSide.x); 
-    bool verticalCollision = (!std::isnan(intersectionTop.x) && ballSpeed.y > 0) || 
-        (!std::isnan(intersectionBottom.x) && ballSpeed.y < 0); 
-
-    // If there is an horizontal collision, compute the rebound angle
-    float angle = 0.0f;
-    if (horizontalCollision)
-        angle = computeReboundAngle(paddleSideSegment, intersectionSide, objectType == ObjectType::PaddleRight);
-
-    // Update collision information
-    m_ball.updateCollision(horizontalCollision, verticalCollision, angle);
-}
-
-/** Computes the rebound angle after an horizontal paddle-ball collision */
-float Engine::computeReboundAngle(Segment paddleSegment, Vec2D intersectionPoint, bool isRightPaddle) {
-    // Compute the relative position of the intersection point inside the paddle segment
-    float middlePointY = (paddleSegment.p1.y + paddleSegment.p2.y) / 2.0;
-    float length = abs(paddleSegment.p1.y - paddleSegment.p2.y) / 2.0;
-    float horizontalCollisionPosition = (intersectionPoint.y - middlePointY) / length;
-
-    // Transform collision position to rebound angle
-    float angle = horizontalCollisionPosition * std::numbers::pi / m_config->get<float>("g", "angle_divisor");
-
-    // If it was the right paddle, adapt the rebound angle
-    if (isRightPaddle)
-        angle = angle >= 0.0 ? std::numbers::pi - angle : -std::numbers::pi - angle;
-    
-    return angle;
-}
-
-/** Check if a goal is scored, in this case add point and reset object positions */
+/** Checks if a goal is scored, in this case add point and reset object positions */
 bool Engine::checkGoalAddScore() {
     // Check if goal has been scored
     bool goalLeftPlayer, goalRightPlayer;
@@ -168,28 +149,21 @@ bool Engine::checkGoalAddScore() {
     // If a goal has been scored, add point to the appropriate player
     if (goalLeftPlayer)
         m_paddleR.addOnePoint();
-    if (goalRightPlayer)
+    else if (goalRightPlayer)
         m_paddleL.addOnePoint();
     return goalLeftPlayer || goalRightPlayer;
 }
 
-/** Modify movement of the objects according to the computed collisions */
-void Engine::updateSpeed() {
-    m_paddleL.updateSpeed();
-    m_paddleR.updateSpeed();
-    m_ball.updateSpeed();
+/** Modifies movement of the objects according to the computed collisions */
+void Engine::modifyObjectsSpeeds() {
+    m_paddleL.modifySpeed();
+    m_paddleR.modifySpeed();
+    m_ball.modifySpeed();
 }
 
 /** Updates moving objects position */
 void Engine::updatePositions() {
-    // Updates positions of the objects
     m_ball.updatePosition();
     m_paddleL.updatePosition();
     m_paddleR.updatePosition();
-}
-
-/** Sets the paddles speeds to zero */
-void Engine::resetPaddlesSpeed() {
-    m_paddleL.setSpeed(Vec2D(0.0f, 0.0f));
-    m_paddleR.setSpeed(Vec2D(0.0f, 0.0f));
 }
